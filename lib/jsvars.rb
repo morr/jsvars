@@ -76,7 +76,7 @@ module Jsvars
             if index = response.body.index(/<\/body>/i)
                 response.body = response.body.insert index, added_script
             else
-                response.body += response.body << added_script
+                response.body += added_script
             end
         end            
     end
