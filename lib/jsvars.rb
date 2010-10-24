@@ -12,12 +12,12 @@ module Jsvars
             @vars_off = true
           end
           @jsvars
-      end   
+      end
 
         def include_jsvars
             jsvars = @jsvars
             name = 'jsvars'
-            return unless jsvars && response && response.content_type && response.content_type[/html|fbml/i]
+            return unless jsvars && response && response.content_type && response.content_type.to_s[/html|fbml/i]
             return if @vars_off
             js_assignments = []
             jsvars.each do |variable, value|
@@ -25,7 +25,7 @@ module Jsvars
                     if variable.to_s[/\./]
                         # allows usage like jsvars['myObj.myVar.myValue'] = "number"
                         object_tests = []
-                        objects = variable.split('.') 
+                        objects = variable.split('.')
                         (0...objects.length - 1).each do |i|
                             object_name = objects[0..i].join('.')
                             object_tests <<
@@ -44,11 +44,11 @@ module Jsvars
                         else {
                             var #{ variable } = #{ value.to_json };
                         }
-                        "    
+                        "
                     end
             end
-            
-            methods = 
+
+            methods =
             '
             var jsvars = {
                     objExtend: function (mainObject) {
@@ -59,26 +59,24 @@ module Jsvars
                                 }
                             }
                         }
-                        return mainObject;	
+                        return mainObject;
                     }
                 }
             '
             methods = methods.gsub(/\n|\r|\t/, ' ').squeeze(' ')
 
-            added_script = 
+            added_script =
 "<!-- added by the #{ name } plugin -->
     <script type='text/javascript'>
-        #{ methods } 
-        #{ js_assignments.join } 
+        #{ methods }
+        #{ js_assignments.join }
     </script>
 <!-- end #{ name } plugin code -->"
 
             if index = response.body.index(/<\/body>/i)
                 response.body = response.body.insert index, added_script
-            else
-                response.body += added_script
             end
-        end            
+        end
     end
 end
 
